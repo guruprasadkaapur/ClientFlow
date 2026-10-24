@@ -1,5 +1,6 @@
 
 import express from "express";
+import cors from "cors";
 import healthRoutes from "./src/routes/health.routes.js";
 import {
   notFoundHandler,
@@ -16,6 +17,14 @@ import activitiesRoutes from "./src/routes/activities.routes.js";
 // import { logActivity } from "../utils/activityLogger.js";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+)
 
 app.use(express.json());
 
