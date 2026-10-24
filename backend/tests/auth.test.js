@@ -35,4 +35,44 @@ describe("ClientFlow Authentication API", () => {
 
     expect(response.status).toBe(401);
   });
+
+  it("registers a new user successfully", async () => {
+    const email = `test-${Date.now()}@example.com`;
+
+    const response = await request(app)
+      .post("/api/v1/auth/register")
+      .send({
+        name: "Integration Test User",
+        email,
+        password: "TestPassword123!",
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.email).toBe(email);
+    expect(response.body.data).not.toHaveProperty("passwordHash");
+  });
+
+  it("logs in a registered user successfully", async () => {
+    const email = `login-${Date.now()}@example.com`;
+    const password = "TestPassword123!";
+
+    const registration = await request(app)
+      .post("/api/v1/auth/register")
+      .send({
+        name: "Login Test User",
+        email,
+        password,
+      });
+
+    expect(registration.status).toBe(201);
+
+    const response = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ email, password });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.token).toBeTruthy();
+  });
 });

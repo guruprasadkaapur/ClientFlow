@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "vitest run",
+    "test": "dotenv -e .env.test -- vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
