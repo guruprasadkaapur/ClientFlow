@@ -239,4 +239,58 @@ router.patch(
     }
 );
 
+ // DELETE /api/v1/projects/:projectId/tasks/:taskId
+router.delete(
+    "/:projectId/tasks/:taskId",
+    async (req, res, next) => {
+        try {
+            const project = await findAccessibleProject(
+                req.params.projectId,
+                req.user.sub
+            );
+
+            if (!project) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Project not found or access denied",
+                });
+            }
+
+            const existingTask = await prisma.task.findFirst({
+                where: {
+                    id: req.params.taskId,
+                    projectId: project.id,
+                },
+            });
+
+            if (!existingTask) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Task not found",
+                });
+            }
+
+            await prisma.task.delete({
+                where: { id: existingTask.id },
+            });
+
+            await logActivity({
+                action: "TASK_DELETED",
+                description: `Deleted task: ${existingTask.title}`,
+                actorId: req.user.sub,
+                projectId: project.id,
+               
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Task deleted successfully",
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+
 export default router;
